@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { read } from '../actions';
+import { read, update } from '../actions';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -38,9 +38,23 @@ const columns = [
 
 
 export default function TableGrid() {
+
     const rows = useSelector(state => state);
+
+
     const dispatch = useDispatch();
-    console.log(rows);
+
+    const selectorHanlder = (selection) => {
+        console.log(selection);
+    }
+    
+    const editHandler = (params) => {
+        console.log(params);
+        let response = axios.post('users/update', params);
+        let newusers = response.data.users;
+        dispatch(update(newusers));
+    }
+
     useEffect(async () => {
         let response = await axios.get('/users');
         dispatch(read(response.data));
@@ -48,9 +62,12 @@ export default function TableGrid() {
     return (
         <div style={{ height: 400, width: '100%' }}>
             <DataGrid
+                checkboxSelection={true}
+                onSelectionModelChange={selectorHanlder}
                 rows={rows}
                 columns={columns}
                 pageSize={5}
+                onCellEditCommit={editHandler}
             />
         </div>
     );
