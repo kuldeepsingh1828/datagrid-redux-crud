@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { DataGrid } from '@mui/x-data-grid';
 import { useSelector, useDispatch } from 'react-redux';
 import axios from 'axios';
-import { read, update } from '../actions';
+import { read, remove, update } from '../actions';
+import { Button } from '@mui/material';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -40,14 +41,25 @@ const columns = [
 export default function TableGrid() {
 
     const rows = useSelector(state => state);
+    const [selection, setSelection] = useState([]);
 
 
     const dispatch = useDispatch();
 
     const selectorHanlder = (selection) => {
-        console.log(selection);
+        setSelection(selection);
     }
-    
+
+    const AddHandler = () => {
+
+    }
+    const deleteHandler = async () => {
+        const response = await axios.post('/users/delete', { id: selection });
+        if (response.data.success) {
+            let newusers = response.data.users;
+            dispatch(remove(newusers));
+        }
+    }
     const editHandler = (params) => {
         console.log(params);
         let response = axios.post('users/update', params);
@@ -61,6 +73,10 @@ export default function TableGrid() {
     }, [])
     return (
         <div style={{ height: 400, width: '100%' }}>
+            <div>
+                <Button onClick={deleteHandler}>Delete</Button>
+                <Button onClick={AddHandler}>Add</Button>
+            </div>
             <DataGrid
                 checkboxSelection={true}
                 onSelectionModelChange={selectorHanlder}
